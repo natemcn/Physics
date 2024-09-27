@@ -13,12 +13,11 @@ screen = pygame.display.set_mode((box_width, box_height))
 
 xpos = 640
 ypos = 360
-
-xvel = 5
-yvel = 5  
+xvel = -4
+yvel = 5
 
 gravity = 0.5
-dampingRate = 0.85
+dampingRate = 0.9
 
 radius = 10
 
