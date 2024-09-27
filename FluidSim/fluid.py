@@ -3,6 +3,7 @@ import sys
 
 pygame.init()
 
+#topleft is 0,0
 box_width, box_height = 1280, 720 
 black = (0, 0, 0)   
 aqua = (0, 255, 255)         
@@ -10,15 +11,18 @@ fps = 120
 
 screen = pygame.display.set_mode((box_width, box_height))
 
-particle_pos = [640, 360] 
-particle_vel = [1, 1]      
-gravity = 9.8
+xpos = 640
+ypos = 360
 
-RADIUS = 10
+xvel = 5
+yvel = 5  
 
+gravity = 0.5
+dampingRate = 0.85
+
+radius = 10
 
 clock = pygame.time.Clock()
-
 
 while True:
     for event in pygame.event.get():
@@ -26,18 +30,29 @@ while True:
             pygame.quit()
             sys.exit()
 
-    particle_pos[0] = particle_vel[0] + particle_pos[0] + gravity
-    particle_pos[1] = particle_vel[1] + particle_pos[1] + gravity
+    yvel += gravity
 
-    if particle_pos[0] - RADIUS <= 0 or particle_pos[0] + RADIUS >= box_width:
-        particle_vel[0] =- particle_vel[0]  
+    xpos += xvel 
+    ypos += yvel 
+
+    if ypos + radius >= box_height: #floor
+        ypos = box_height - radius
+        yvel = -yvel * dampingRate
     
-    if particle_pos[1] - RADIUS <= 0 or particle_pos[1] + RADIUS >= box_height:
-        particle_vel[1] =- particle_vel[1]  
+    if ypos - radius <= 0: #roof
+        ypos = radius
+        yvel = -yvel * dampingRate
+    if xpos + radius >= box_width: #right wall
+        xpos = box_width - radius
+        xvel = -xvel * dampingRate
+
+    if xpos - radius <= 0: #left wall
+        xpos = radius
+        xvel = -xvel * dampingRate
 
     screen.fill(black)
 
-    pygame.draw.circle(screen, aqua, particle_pos, RADIUS)
+    pygame.draw.circle(screen, aqua, (int(xpos), int(ypos)), radius)
     pygame.display.flip()
 
     clock.tick(fps)
