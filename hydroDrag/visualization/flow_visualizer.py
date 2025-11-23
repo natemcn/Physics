@@ -22,17 +22,21 @@ class FlowVisualizer:
         # Get grid coordinates
         x = np.linspace(0, wind_tunnel.width, wind_tunnel.grid_resolution[0])
         y = np.linspace(0, wind_tunnel.height, wind_tunnel.grid_resolution[1])
-        X, Y = np.meshgrid(x, y, indexing='ij')
+        # Use 'xy' indexing for matplotlib compatibility
+        X, Y = np.meshgrid(x, y, indexing='xy')
         
         # Get velocity field
         velocity = wind_tunnel.get_velocity_field()
-        u = velocity[0]
-        v = velocity[1]
+        # Velocity is in 'ij' indexing, transpose for 'xy' indexing
+        u = velocity[0].T
+        v = velocity[1].T
         
         # Plot pressure field as background
         if show_pressure:
             pressure = wind_tunnel.get_pressure_field()
-            im = ax.contourf(X, Y, pressure, levels=20, cmap='coolwarm', alpha=0.6)
+            # Pressure is in 'ij' indexing, transpose for 'xy' indexing
+            pressure_xy = pressure.T
+            im = ax.contourf(X, Y, pressure_xy, levels=20, cmap='coolwarm', alpha=0.6)
             plt.colorbar(im, ax=ax, label='Pressure (Pa)')
         
         # Plot streamlines
@@ -40,17 +44,22 @@ class FlowVisualizer:
             # Subsample for cleaner visualization
             skip = max(1, min(u.shape) // 20)
             
-            # Create properly shaped subsampled arrays
-            # Use slice objects to ensure consistent dimensions
-            slice_i = slice(None, None, skip)
-            slice_j = slice(None, None, skip)
+            # Subsample velocity arrays
+            u_sub = u[::skip, ::skip]
+            v_sub = v[::skip, ::skip]
             
-            X_sub = X[slice_i, slice_j]
-            Y_sub = Y[slice_i, slice_j]
-            u_sub = u[slice_i, slice_j]
-            v_sub = v[slice_i, slice_j]
+            # Get the actual shape after subsampling
+            n_y_sub, n_x_sub = u_sub.shape  # Note: 'xy' indexing means shape is (ny, nx)
             
-            # Verify all arrays have the same shape
+            # Create coordinate arrays that match the subsampled velocity shape
+            x_sub = np.linspace(0, wind_tunnel.width, n_x_sub)
+            y_sub = np.linspace(0, wind_tunnel.height, n_y_sub)
+            
+            # Create meshgrid with 'xy' indexing which streamplot expects
+            # This ensures X has constant rows and Y has constant columns
+            X_sub, Y_sub = np.meshgrid(x_sub, y_sub, indexing='xy')
+            
+            # Verify shapes match
             if X_sub.shape == Y_sub.shape == u_sub.shape == v_sub.shape:
                 ax.streamplot(
                     X_sub,
@@ -63,7 +72,7 @@ class FlowVisualizer:
                     arrowsize=0.5
                 )
             else:
-                # Fallback: use original arrays if subsampling causes shape mismatch
+                # Fallback: use original arrays without subsampling
                 ax.streamplot(
                     X,
                     Y,
