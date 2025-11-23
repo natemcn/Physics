@@ -39,16 +39,41 @@ class FlowVisualizer:
         if show_streamlines:
             # Subsample for cleaner visualization
             skip = max(1, min(u.shape) // 20)
-            ax.streamplot(
-                X[::skip, ::skip],
-                Y[::skip, ::skip],
-                u[::skip, ::skip],
-                v[::skip, ::skip],
-                density=1.5,
-                color='black',
-                linewidth=0.5,
-                arrowsize=0.5
-            )
+            
+            # Create properly shaped subsampled arrays
+            # Use slice objects to ensure consistent dimensions
+            slice_i = slice(None, None, skip)
+            slice_j = slice(None, None, skip)
+            
+            X_sub = X[slice_i, slice_j]
+            Y_sub = Y[slice_i, slice_j]
+            u_sub = u[slice_i, slice_j]
+            v_sub = v[slice_i, slice_j]
+            
+            # Verify all arrays have the same shape
+            if X_sub.shape == Y_sub.shape == u_sub.shape == v_sub.shape:
+                ax.streamplot(
+                    X_sub,
+                    Y_sub,
+                    u_sub,
+                    v_sub,
+                    density=1.5,
+                    color='black',
+                    linewidth=0.5,
+                    arrowsize=0.5
+                )
+            else:
+                # Fallback: use original arrays if subsampling causes shape mismatch
+                ax.streamplot(
+                    X,
+                    Y,
+                    u,
+                    v,
+                    density=1.5,
+                    color='black',
+                    linewidth=0.5,
+                    arrowsize=0.5
+                )
         
         # Plot velocity magnitude as quiver (optional, can be slow)
         # Uncomment for vector field visualization

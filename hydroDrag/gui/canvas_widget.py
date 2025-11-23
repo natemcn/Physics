@@ -1,6 +1,7 @@
 """Canvas widget for visualization using matplotlib."""
 
 import tkinter as tk
+from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import numpy as np
