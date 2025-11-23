@@ -62,24 +62,35 @@ class Cylinder(BaseObject):
     def contains_point(self, point):
         """Check if point is inside cylinder."""
         point = np.array(point)
-        rel_pos = point - self.position
+        # Handle 2D or 3D points - only use matching dimensions
+        pos_2d = self.position[:len(point)]
+        rel_pos = point - pos_2d
         
-        # Project onto cylinder axis
-        axis_vec = np.zeros(3)
-        if self.axis == 'x':
-            axis_vec[0] = 1
-            axis_dist = abs(rel_pos[0])
-            perp_dist = np.linalg.norm(rel_pos[1:])
-        elif self.axis == 'y':
-            axis_vec[1] = 1
-            axis_dist = abs(rel_pos[1])
-            perp_dist = np.sqrt(rel_pos[0]**2 + rel_pos[2]**2)
-        else:  # 'z'
-            axis_vec[2] = 1
-            axis_dist = abs(rel_pos[2])
-            perp_dist = np.linalg.norm(rel_pos[:2])
-        
-        return axis_dist <= self.height / 2 and perp_dist <= self.radius
+        # For 2D simulation, assume cylinder axis is 'z' (perpendicular to plane)
+        if len(point) == 2:
+            # 2D point - cylinder extends in z direction (out of plane)
+            # Check if point is within radius in xy plane
+            perp_dist = np.linalg.norm(rel_pos)
+            # For 2D, we ignore height (cylinder extends infinitely in z)
+            return perp_dist <= self.radius
+        else:
+            # 3D point - use original logic
+            # Project onto cylinder axis
+            axis_vec = np.zeros(3)
+            if self.axis == 'x':
+                axis_vec[0] = 1
+                axis_dist = abs(rel_pos[0])
+                perp_dist = np.linalg.norm(rel_pos[1:])
+            elif self.axis == 'y':
+                axis_vec[1] = 1
+                axis_dist = abs(rel_pos[1])
+                perp_dist = np.sqrt(rel_pos[0]**2 + rel_pos[2]**2)
+            else:  # 'z'
+                axis_vec[2] = 1
+                axis_dist = abs(rel_pos[2])
+                perp_dist = np.linalg.norm(rel_pos[:2])
+            
+            return axis_dist <= self.height / 2 and perp_dist <= self.radius
     
     def get_characteristic_length(self):
         """Characteristic length is diameter for cylinder."""

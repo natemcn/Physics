@@ -37,6 +37,7 @@ class FlowVisualizer:
             # Pressure is in 'ij' indexing, transpose for 'xy' indexing
             pressure_xy = pressure.T
             im = ax.contourf(X, Y, pressure_xy, levels=20, cmap='coolwarm', alpha=0.6)
+            # Add colorbar (canvas widget will handle removing old ones)
             plt.colorbar(im, ax=ax, label='Pressure (Pa)')
         
         # Plot streamlines

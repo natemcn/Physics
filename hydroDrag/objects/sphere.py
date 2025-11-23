@@ -34,7 +34,9 @@ class Sphere(BaseObject):
     def contains_point(self, point):
         """Check if point is inside sphere."""
         point = np.array(point)
-        distance = np.linalg.norm(point - self.position)
+        # Handle 2D or 3D points - only use matching dimensions
+        pos_2d = self.position[:len(point)]
+        distance = np.linalg.norm(point - pos_2d)
         return distance <= self.radius
     
     def get_characteristic_length(self):

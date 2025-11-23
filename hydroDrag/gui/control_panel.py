@@ -135,26 +135,40 @@ class ControlPanel(ttk.Frame):
     
     def _add_object(self, obj_type):
         """Add an object to the wind tunnel."""
-        # Default position (center of tunnel)
-        x = self.wind_tunnel.width / 2
-        y = self.wind_tunnel.height / 2
-        
-        if obj_type == 'sphere':
-            obj = Sphere([x, y, 0], radius=0.3)
-        elif obj_type == 'cylinder':
-            obj = Cylinder([x, y, 0], radius=0.2, height=0.4)
-        elif obj_type == 'box':
-            obj = Box([x, y, 0], dimensions=[0.4, 0.3, 0.2])
-        else:
-            return
-        
-        self.wind_tunnel.add_object(obj)
-        self._update_object_list()
-        self.canvas_widget.update_display()
-        # Update force display
-        if self.wind_tunnel.objects:
-            drag_results = self.drag_calculator.calculate_all_drag_forces()
-            self.update_force_display(drag_results)
+        try:
+            # Default position (center of tunnel)
+            x = self.wind_tunnel.width / 2
+            y = self.wind_tunnel.height / 2
+            
+            if obj_type == 'sphere':
+                obj = Sphere([x, y, 0], radius=0.3)
+            elif obj_type == 'cylinder':
+                obj = Cylinder([x, y, 0], radius=0.2, height=0.4)
+            elif obj_type == 'box':
+                obj = Box([x, y, 0], dimensions=[0.4, 0.3, 0.2])
+            else:
+                return
+            
+            self.wind_tunnel.add_object(obj)
+            self._update_object_list()
+            
+            # Update display (this might fail, but object is already added)
+            try:
+                self.canvas_widget.update_display()
+            except Exception as e:
+                print(f"Warning: Display update failed: {e}")
+            
+            # Update force display
+            try:
+                if self.wind_tunnel.objects:
+                    drag_results = self.drag_calculator.calculate_all_drag_forces()
+                    self.update_force_display(drag_results)
+            except Exception as e:
+                print(f"Warning: Force calculation failed: {e}")
+        except Exception as e:
+            print(f"Error adding object: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _clear_objects(self):
         """Clear all objects."""

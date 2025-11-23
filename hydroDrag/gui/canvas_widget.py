@@ -48,6 +48,15 @@ class CanvasWidget(ttk.Frame):
     
     def update_display(self):
         """Update the visualization display."""
+        # Remove any existing colorbars before clearing
+        for ax in self.fig.axes:
+            if ax != self.ax:
+                try:
+                    ax.remove()
+                except:
+                    pass
+        
+        # Clear main axes
         self.ax.clear()
         
         # Set up axes

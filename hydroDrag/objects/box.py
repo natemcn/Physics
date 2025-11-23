@@ -57,7 +57,9 @@ class Box(BaseObject):
     def contains_point(self, point):
         """Check if point is inside box."""
         point = np.array(point)
-        rel_pos = point - self.position
+        # Handle 2D or 3D points - only use matching dimensions
+        pos_2d = self.position[:len(point)]
+        rel_pos = point - pos_2d
         half_dims = self.dimensions / 2.0
         
         # Check if point is within bounds in all dimensions
